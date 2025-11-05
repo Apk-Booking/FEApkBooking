@@ -5,18 +5,29 @@ import 'package:feapkbooking/auth/register_screen.dart';
 import 'package:feapkbooking/pages/admin_dashboard.dart';
 import 'package:feapkbooking/pages/booking_form.dart';
 import 'package:feapkbooking/pages/user_dashboard.dart';
+import 'package:feapkbooking/providers/booking_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:google_fonts/google_fonts.dart';
 
-// Import Providers
 import 'providers/auth_provider.dart';
-import 'providers/booking_provider.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
+// --- DEFINISI WARNA PLN BARU (DARI SCREENSHOT) ---
+const Color plnBlue = Color(0xFF0D47A1); // Biru lebih tua (dari header)
+const Color plnYellow = Color(0xFFF9A825); // Kuning (tombol)
+const Color plnLightGray = Color(0xFFF4F7F9); // Latar belakang
+const Color plnRed = Color(0xFFD32F2F); // Merah (logout)
+const Color plnGreen = Color(0xFF388E3C); // Hijau (disetujui)
+const Color plnOrange = Color(0xFFF57C00); // Oranye (menunggu)
+// -------------------------------------------------
 
 void main() {
-  // Atur default locale untuk format tanggal/waktu Indonesia
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   Intl.defaultLocale = 'id_ID';
   runApp(const MyApp());
 }
@@ -26,17 +37,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MultiProvider mendaftarkan semua state management di level tertinggi
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => BookingProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, BookingProvider>(
+          create: (context) => BookingProvider(null),
+          update: (context, authProvider, previousBookingProvider) {
+            return BookingProvider(authProvider.namaUser);
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'PLN Booking App',
         debugShowCheckedModeBanner: false,
 
-        // Konfigurasi untuk bahasa Indonesia (untuk format tanggal)
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
@@ -46,61 +60,97 @@ class MyApp extends StatelessWidget {
           Locale('id', 'ID'),
         ],
 
-        // === TEMA APLIKASI ===
+        // === TEMA PLN SESUAI SCREENSHOT BARU ===
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-          primaryColor: const Color(0xFF005EA0), // Warna biru PLN
-
-          // Menggunakan Google Fonts "Poppins" untuk seluruh aplikasi
+          primaryColor: plnBlue,
+          scaffoldBackgroundColor: plnLightGray,
           fontFamily: GoogleFonts.poppins().fontFamily,
           textTheme: GoogleFonts.poppinsTextTheme(
             Theme.of(context).textTheme,
+          ).apply(
+            bodyColor: const Color(0xFF333333),
+            displayColor: const Color(0xFF333333),
           ),
 
-          // Tema untuk AppBar
+          // TEMA KARTU (Putih mengambang)
+          cardTheme: CardThemeData(
+            elevation: 1, // Bayangan lembut
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+
+          // TEMA APPBAR (Biru PLN)
           appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF005EA0),
+            backgroundColor: plnBlue,
             foregroundColor: Colors.white,
             elevation: 0,
+            // (Judul di screenshot terlihat rata kiri, ini default di Flutter)
           ),
 
-          // Tema untuk Tombol
+          // TEMA TOMBOL UTAMA (Biru PLN)
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF005EA0), // Biru tua
+              backgroundColor: plnBlue,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
+              textStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              )
             ),
           ),
 
-          // Tema untuk Input Form (TextFormField, Dropdown)
+          // TEMA FORM INPUT (Modern)
           inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF005EA0), width: 2),
+              borderSide: const BorderSide(color: plnBlue, width: 2),
             ),
-            prefixIconColor: const Color(0xFF005EA0), // Warna ikon di form
-            iconColor: const Color(0xFF005EA0), // Warna ikon di form
+            prefixIconColor: plnBlue,
+            iconColor: plnBlue,
           ),
+          
+          // HAPUS TEMA FAB
+          // floatingActionButtonTheme: ... (Kita hapus ini)
+          
+          // TEMA CHIP (Untuk Status)
+          chipTheme: ChipThemeData(
+            labelStyle: const TextStyle(
+              color: Colors.white, 
+              fontWeight: FontWeight.bold,
+              fontSize: 12
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          )
         ),
         // === AKHIR TEMA ===
 
-        // Halaman awal saat aplikasi dibuka
         home: const LoginScreen(),
         
-        // Daftar semua rute/halaman di aplikasi
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/user_dashboard': (context) => const UserDashboardScreen(),
           '/admin_dashboard': (context) => const AdminDashboardScreen(),
-          // Rute ini menangani Create dan Edit
           '/booking_form': (context) => const BookingFormScreen(),
         },
       ),
