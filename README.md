@@ -1,2 +1,2 @@
 # FEApkBooking
-front end Apk Booking Ruang Rapat
+Frontend Aplikasi Booking Ruang Rapat
