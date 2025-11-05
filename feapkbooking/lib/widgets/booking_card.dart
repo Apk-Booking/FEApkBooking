@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
 
+// Ambil warna dari main.dart (atau definisikan ulang di sini)
+const Color plnStatusGreen = Color(0xFF2E7D32);
+const Color plnStatusOrange = Color(0xFFEF6C00);
+const Color plnStatusRed = Color(0xFFC62828); // Merah (Ditolak)
+const Color plnBlue = Color(0xFF005EA0);
+
 class BookingCard extends StatelessWidget {
   final Booking booking;
 
@@ -12,12 +18,12 @@ class BookingCard extends StatelessWidget {
   Color _getStatusColor(BookingStatus status) {
     switch (status) {
       case BookingStatus.disetujui:
-        return Colors.green[600]!;
+        return plnStatusGreen;
       case BookingStatus.ditolak:
-        return Colors.red[600]!;
+        return plnStatusRed;
       case BookingStatus.menunggu:
       default:
-        return Colors.orange[700]!;
+        return plnStatusOrange;
     }
   }
 
@@ -35,10 +41,8 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Card ini akan otomatis mengambil tema (putih, rounded) dari main.dart
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -46,6 +50,7 @@ class BookingCard extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -56,18 +61,10 @@ class BookingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(booking.status),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _getStatusText(booking.status),
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
+                // Chip ini akan mengambil tema dari main.dart
+                Chip(
+                  label: Text(_getStatusText(booking.status)),
+                  backgroundColor: _getStatusColor(booking.status),
                 ),
               ],
             ),
@@ -99,7 +96,7 @@ class BookingCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: const Color(0xFF005EA0), size: 20),
+          Icon(icon, color: plnBlue, size: 20), // Gunakan plnBlue
           const SizedBox(width: 12),
           Expanded(
             child: Column(

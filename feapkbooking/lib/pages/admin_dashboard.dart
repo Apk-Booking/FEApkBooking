@@ -1,18 +1,29 @@
+// lib/pages/admin_dashboard.dart
+
 import 'package:feapkbooking/pages/booking_form.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/booking.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
+import '../../widgets/summary_card.dart'; 
+
+// Definisikan warna di sini
+const Color plnBlue = Color(0xFF0D47A1);
+const Color plnGreen = Color(0xFF388E3C);
+const Color plnOrange = Color(0xFFF57C00);
+const Color plnRed = Color(0xFFD32F2F);
+const Color plnStatusRed = Color(0xFFC62828);
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
 
   Color _getStatusColor(BookingStatus status) {
     switch (status) {
-      case BookingStatus.disetujui: return Colors.green;
-      case BookingStatus.ditolak: return Colors.red;
-      case BookingStatus.menunggu: default: return Colors.orange;
+      case BookingStatus.disetujui: return plnGreen;
+      case BookingStatus.ditolak: return plnStatusRed;
+      case BookingStatus.menunggu: default: return plnOrange;
     }
   }
 
@@ -36,9 +47,7 @@ class AdminDashboardScreen extends StatelessWidget {
           actions: <Widget>[
             TextButton(
               child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -63,32 +72,34 @@ class AdminDashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: 'Tambah Booking Baru',
-            onPressed: () {
-               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BookingFormScreen(existingBooking: null),
+          Center(
+            child: TextButton.icon(
+              icon: const Icon(Icons.logout, size: 16),
+              label: const Text('Logout'),
+              onPressed: () async {
+                await authProvider.logout();
+                if (context.mounted) {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/login', (route) => false);
+                }
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: plnRed,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              );
-            },
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14
+                ),
+              ),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await authProvider.logout();
-              if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/login', (route) => false);
-              }
-            },
-          ),
+          const SizedBox(width: 8),
         ],
       ),
-      backgroundColor: Colors.grey[100],
       body: Consumer<BookingProvider>(
         builder: (context, bookingProvider, child) {
           
@@ -110,41 +121,65 @@ class AdminDashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Kelola Booking Ruang Rapat',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Total Booking',
-                        totalBooking.toString(),
-                        Colors.blue[800]!,
-                        Icons.book_online,
+                    const Expanded(
+                      child: Text(
+                        'Kelola Booking Ruang Rapat',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Disetujui',
-                        disetujui.toString(),
-                        Colors.green[600]!,
-                        Icons.check_circle_outline,
+                    const SizedBox(width: 8), 
+                    
+                    // --- PERUBAHAN: Tombol Ikon Saja ---
+                    ElevatedButton(
+                      onPressed: () {
+                         Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BookingFormScreen(existingBooking: null),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.add, size: 24), // Hanya ikon
+                      style: ElevatedButton.styleFrom(
+                        // Warna (plnBlue) sudah dari tema
+                        minimumSize: const Size(48, 48), // Ukuran tombol
+                        padding: EdgeInsets.zero, // Padding minimal
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Menunggu',
-                        menunggu.toString(),
-                        Colors.orange[700]!,
-                        Icons.hourglass_top_outlined,
-                      ),
-                    ),
+                    // --- BATAS PERUBAHAN ---
                   ],
                 ),
+
+                const SizedBox(height: 16),
+                
+                SummaryCard(
+                  title: 'Total Booking',
+                  count: totalBooking.toString(),
+                  backgroundColor: plnBlue,
+                  icon: Icons.book_online, 
+                ),
+                const SizedBox(height: 12),
+                SummaryCard(
+                  title: 'Disetujui',
+                  count: disetujui.toString(),
+                  backgroundColor: plnGreen,
+                  icon: Icons.check_circle_outline,
+                ),
+                const SizedBox(height: 12),
+                SummaryCard(
+                  title: 'Menunggu',
+                  count: menunggu.toString(),
+                  backgroundColor: plnOrange,
+                  icon: Icons.hourglass_top_outlined,
+                ),
+                
                 const SizedBox(height: 24),
                 const Text(
                   'Semua Booking',
@@ -152,79 +187,26 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
 
-                // --- INI PERBAIKANNYA ---
-                // Bungkus dengan SingleChildScrollView untuk scrolling horizontal
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+                if (allBookings.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 24.0),
+                    child: Center(
+                      child: Text(
+                        'Belum ada booking.',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
                     ),
-                    // Beri lebar minimal selebar layar
-                    constraints: BoxConstraints(
-                      minWidth: MediaQuery.of(context).size.width - 32, // (lebar layar - padding)
-                    ),
-                    child: DataTable(
-                      columnSpacing: 20, // Beri jarak antar kolom
-                      horizontalMargin: 12,
-                      columns: const [
-                        DataColumn(label: Text('NAMA', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('RUANGAN', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('STATUS', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('AKSI', style: TextStyle(fontWeight: FontWeight.bold))),
-                      ],
-                      rows: allBookings.map((booking) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(booking.namaPegawai)),
-                            DataCell(Text(booking.namaRuangan)),
-                            DataCell(
-                              Chip(
-                                label: Text(
-                                  _getStatusText(booking.status),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 10),
-                                ),
-                                backgroundColor: _getStatusColor(booking.status),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 0),
-                              ),
-                            ),
-                            DataCell(
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, size: 20),
-                                    color: Colors.blue[700],
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => BookingFormScreen(
-                                            existingBooking: booking,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, size: 20),
-                                    color: Colors.red[700],
-                                    onPressed: () {
-                                      _showDeleteConfirmDialog(context, booking);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
+                  )
+                else
+                  ListView.builder(
+                    itemCount: allBookings.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final booking = allBookings[index];
+                      return _buildAdminBookingTile(context, booking);
+                    },
                   ),
-                ),
-                // --- BATAS PERBAIKAN ---
               ],
             ),
           );
@@ -232,33 +214,62 @@ class AdminDashboardScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildSummaryCard(
-      String title, String count, Color color, IconData icon) {
+  
+  // Widget list interaktif
+  Widget _buildAdminBookingTile(BuildContext context, Booking booking) {
     return Card(
-      color: color,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookingFormScreen(existingBooking: booking),
             ),
-            Text(
-              count,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      booking.namaPegawai,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    Text(
+                      booking.divisi,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      booking.namaRuangan,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '${DateFormat('dd/MM/yy').format(booking.tanggal)}  (${booking.waktuMulai}-${booking.waktuSelesai})',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Chip(
+                label: Text(_getStatusText(booking.status)),
+                backgroundColor: _getStatusColor(booking.status),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, size: 22),
+                color: Colors.red[700],
+                onPressed: () {
+                  _showDeleteConfirmDialog(context, booking);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

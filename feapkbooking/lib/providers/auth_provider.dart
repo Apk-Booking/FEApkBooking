@@ -11,16 +11,19 @@ class AuthProvider with ChangeNotifier {
   
   AuthStatus _authStatus = AuthStatus.unauthenticated;
   UserRole _userRole = UserRole.unknown;
+  String _namaUser = ""; // <-- TAMBAHKAN INI (Untuk simpan nama)
   
   AuthStatus get authStatus => _authStatus;
   UserRole get userRole => _userRole;
+  String get namaUser => _namaUser; // <-- TAMBAHKAN INI
 
   Future<bool> login(String email, String password) async {
-    final role = await _authService.login(email, password);
+    final userInfo = await _authService.login(email, password); // Ini sekarang Map
 
-    if (role != null) {
+    if (userInfo != null) {
       _authStatus = AuthStatus.authenticated;
-      _userRole = (role == 'admin') ? UserRole.admin : UserRole.user;
+      _userRole = (userInfo['role'] == 'admin') ? UserRole.admin : UserRole.user;
+      _namaUser = userInfo['nama'] ?? 'User'; // <-- SIMPAN NAMA
       notifyListeners();
       return true;
     }
@@ -28,6 +31,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> register(String name, String email, String password) async {
+    // AuthService akan return true/false
+    // UI (RegisterScreen) akan menangani pesan errornya
     return await _authService.register(name, email, password);
   }
 
@@ -35,6 +40,7 @@ class AuthProvider with ChangeNotifier {
     await _authService.logout();
     _authStatus = AuthStatus.unauthenticated;
     _userRole = UserRole.unknown;
+    _namaUser = ""; // <-- RESET NAMA
     notifyListeners();
   }
 }

@@ -2,36 +2,38 @@
 
 import 'package:flutter/foundation.dart';
 import '../models/booking.dart';
-import '../services/dummy_data.dart'; // Nanti ini diganti API Service
+import '../services/dummy_data.dart'; 
 
 class BookingProvider with ChangeNotifier {
   List<Booking> _allBookings = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
+  final String? _loggedInUserName; // <-- Variabel untuk simpan nama user
 
-  // Getter
   List<Booking> get allBookings => _allBookings;
+  
+  // Filter dinamis berdasarkan nama user yang login
   List<Booking> get userBookings => _allBookings
-      .where((b) =>
-          b.namaPegawai == 'Budi Santoso' || b.namaPegawai == 'Diana')
+      .where((b) => b.namaPegawai == _loggedInUserName) // <-- FILTER DINAMIS
       .toList();
   
   bool get isLoading => _isLoading;
 
-  BookingProvider() {
+  // Constructor diubah untuk menerima nama user
+  BookingProvider(this._loggedInUserName) {
     fetchAllBookings();
   }
 
   Future<void> fetchAllBookings() async {
     _isLoading = true;
-    notifyListeners();
+    // Jangan panggil notifyListeners() di sini saat _isLoading = true
     
     await Future.delayed(const Duration(milliseconds: 500));
-    _allBookings = List.from(dummyBookings); // Salin list agar tidak terikat
-    
+    _allBookings = List.from(dummyBookings); 
     _isLoading = false;
-    notifyListeners();
+    notifyListeners(); // Panggil setelah semua data siap
   }
 
+  // Method CRUD lainnya sudah aman
   Future<void> createBooking(Booking newBooking) async {
     _isLoading = true;
     notifyListeners();

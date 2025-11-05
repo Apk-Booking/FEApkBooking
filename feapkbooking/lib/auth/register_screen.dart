@@ -1,4 +1,4 @@
-// lib/pages/auth/register_screen.dart
+// lib/auth/register_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -51,9 +51,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         Navigator.pop(context); // Kembali ke halaman login
       } else {
+        // --- PESAN ERROR DIPERJELAS ---
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Registrasi gagal. Coba lagi.'),
+            content: Text('Registrasi gagal. Email mungkin sudah terdaftar.'),
             backgroundColor: Colors.red,
           ),
         );
