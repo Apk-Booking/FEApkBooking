@@ -35,7 +35,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   bool get isEditMode => widget.existingBooking != null;
 
   final List<String> _listDivisi = [
-    'Distribusi', 'Transmisi', 'Pembangkitan', 'Keuangan', 'SDM', 'Hukum', 'IT'
+    'Opsisdis', 'Fasop', 'Pemeliharaan', 'Keuangan', 'Pengadaan', 'HAR', 'IT'
   ];
   final List<String> _listRuangan = [
     'Ruang Rapat Utama', 'Ruang Rapat Lt.2', 'Ruang Rapat Lt.3', 'Ruang Rapat Lt.4'
