@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
 
-// Ambil warna dari main.dart (atau definisikan ulang di sini)
-const Color plnStatusGreen = Color(0xFF2E7D32);
-const Color plnStatusOrange = Color(0xFFEF6C00);
-const Color plnStatusRed = Color(0xFFC62828); // Merah (Ditolak)
-const Color plnBlue = Color(0xFF005EA0);
+// Definisikan warna di sini
+const Color plnGreen = Color(0xFF388E3C);
+const Color plnOrange = Color(0xFFF57C00);
+const Color plnRed = Color(0xFFD32F2F);
+const Color plnBlue = Color(0xFF0D47A1);
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -18,12 +18,12 @@ class BookingCard extends StatelessWidget {
   Color _getStatusColor(BookingStatus status) {
     switch (status) {
       case BookingStatus.disetujui:
-        return plnStatusGreen;
+        return plnGreen;
       case BookingStatus.ditolak:
-        return plnStatusRed;
+        return plnRed;
       case BookingStatus.menunggu:
       default:
-        return plnStatusOrange;
+        return plnOrange;
     }
   }
 
@@ -96,7 +96,7 @@ class BookingCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: plnBlue, size: 20), // Gunakan plnBlue
+          Icon(icon, color: plnBlue, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

@@ -13,8 +13,13 @@ const Color plnBlue = Color(0xFF0D47A1);
 
 class BookingFormScreen extends StatefulWidget {
   final Booking? existingBooking;
+  final String? selectedRoomName;
 
-  const BookingFormScreen({Key? key, this.existingBooking}) : super(key: key);
+  const BookingFormScreen({
+    Key? key,
+    this.existingBooking,
+    this.selectedRoomName,
+  }) : super(key: key);
 
   @override
   State<BookingFormScreen> createState() => _BookingFormScreenState();
@@ -35,10 +40,11 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   bool get isEditMode => widget.existingBooking != null;
 
   final List<String> _listDivisi = [
-    'Opsisdis', 'Fasop', 'Pemeliharaan', 'Keuangan', 'Pengadaan', 'HAR', 'IT'
+    'Distribusi', 'Transmisi', 'Pembangkitan', 'Keuangan', 'SDM', 'Hukum', 'IT'
   ];
   final List<String> _listRuangan = [
-    'Ruang Rapat Utama', 'Ruang Rapat Lt.2', 'Ruang Rapat Lt.3', 'Ruang Rapat Lt.4'
+    'Ruang Sriwijaya', 'Ruang Majapahit', 'Ruang Rapat Utama', 
+    'Ruang Rapat Lt.2', 'Ruang Rapat Lt.3', 'Ruang Rapat Lt.4'
   ];
 
   @override
@@ -52,6 +58,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
       _selectedDate = booking.tanggal;
       _waktuController.text = '${booking.waktuMulai}-${booking.waktuSelesai}';
       _selectedStatus = booking.status;
+    } else if (widget.selectedRoomName != null) {
+      _selectedRuangan = widget.selectedRoomName;
     }
   }
 
@@ -78,11 +86,23 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     super.dispose();
   }
 
+  // --- PERBAIKAN LOGIKA TANGGAL ---
   Future<void> _selectDate(BuildContext context) async {
+    // 1. Tentukan "hari ini" (tanpa jam/menit)
+    final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    // 2. Tentukan tanggal awal kalender
+    DateTime initialToShow = _selectedDate ?? today;
+
+    // 3. JIKA tanggal yang diedit (initialToShow) sudah lewat (sebelum hari ini),
+    //    MAKA paksa kalender terbuka di hari ini.
+    if (initialToShow.isBefore(today)) {
+      initialToShow = today;
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: initialToShow, // <-- Gunakan tanggal yang sudah diperbaiki
+      firstDate: today, // <-- Gunakan 'today' sebagai tanggal paling awal
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedDate) {
@@ -91,6 +111,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
       });
     }
   }
+  // --- BATAS PERBAIKAN ---
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate() || _selectedDate == null) {
@@ -99,28 +120,23 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         );
       return;
     }
-    
     setState(() { _isLoading = true; });
-
     final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
 
     try {
       if (isEditMode) {
-        // --- LOGIKA UPDATE ---
         final updatedBooking = Booking(
           id: widget.existingBooking!.id,
           namaPegawai: _namaController.text,
           divisi: _selectedDivisi!,
           namaRuangan: _selectedRuangan!,
           tanggal: _selectedDate!,
-          // --- INI PERBAIKANNYA (waktuMd -> waktuMulai) ---
           waktuMulai: _waktuController.text.split('-')[0], 
           waktuSelesai: _waktuController.text.split('-')[1],
           status: _selectedStatus,
         );
         await bookingProvider.updateBooking(updatedBooking);
       } else {
-        // --- LOGIKA CREATE (Ini sudah benar) ---
         final newBooking = Booking(
           id: 'dummy_${DateTime.now().millisecondsSinceEpoch}',
           namaPegawai: _namaController.text,
@@ -133,14 +149,12 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         );
         await bookingProvider.createBooking(newBooking);
       }
-      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Data berhasil di-${isEditMode ? 'update' : 'tambah'}!')),
         );
         Navigator.of(context).pop();
       }
-
     } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -156,6 +170,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final bool isAdmin = authProvider.userRole == UserRole.admin;
+    final bool isRoomLocked = (widget.selectedRoomName != null && !isEditMode);
 
     return Scaffold(
       appBar: AppBar(
@@ -202,11 +217,15 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                 validator: (value) => value == null ? 'Pilih divisi' : null,
               ),
               const SizedBox(height: 20),
+              
               DropdownButtonFormField<String>(
                 value: _selectedRuangan,
-                decoration: const InputDecoration(
+                onChanged: isRoomLocked ? null : (newValue) => setState(() => _selectedRuangan = newValue),
+                decoration: InputDecoration(
                   labelText: 'Ruang Rapat',
-                  prefixIcon: Icon(Icons.meeting_room_outlined),
+                  prefixIcon: const Icon(Icons.meeting_room_outlined),
+                  filled: isRoomLocked,
+                  fillColor: isRoomLocked ? Colors.grey[200] : Colors.white,
                 ),
                 items: _listRuangan.map((String ruangan) {
                   return DropdownMenuItem<String>(
@@ -214,9 +233,9 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                     child: Text(ruangan),
                   );
                 }).toList(),
-                onChanged: (newValue) => setState(() => _selectedRuangan = newValue),
                 validator: (value) => value == null ? 'Pilih ruangan' : null,
               ),
+              
               const SizedBox(height: 20),
               InkWell(
                 onTap: () => _selectDate(context),

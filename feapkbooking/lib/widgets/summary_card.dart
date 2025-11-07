@@ -18,7 +18,6 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Kita TIDAK pakai Card() dari tema, tapi buat container sendiri
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -28,7 +27,6 @@ class SummaryCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 1. Teks (Kiri)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -52,10 +50,9 @@ class SummaryCard extends StatelessWidget {
             ],
           ),
           
-          // 2. Ikon (Kanan)
           Icon(
             icon,
-            color: Colors.white.withOpacity(0.8), // Ikon sedikit transparan
+            color: Colors.white.withOpacity(0.8),
             size: 40,
           ),
         ],

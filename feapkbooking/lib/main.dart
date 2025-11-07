@@ -4,7 +4,7 @@ import 'package:feapkbooking/auth/login_screen.dart';
 import 'package:feapkbooking/auth/register_screen.dart';
 import 'package:feapkbooking/pages/admin_dashboard.dart';
 import 'package:feapkbooking/pages/booking_form.dart';
-import 'package:feapkbooking/pages/user_dashboard.dart';
+import 'package:feapkbooking/pages/user_main_screen.dart'; 
 import 'package:feapkbooking/providers/booking_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -15,14 +15,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'providers/auth_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-// --- DEFINISI WARNA PLN BARU (DARI SCREENSHOT) ---
-const Color plnBlue = Color(0xFF0D47A1); // Biru lebih tua (dari header)
-const Color plnYellow = Color(0xFFF9A825); // Kuning (tombol)
-const Color plnLightGray = Color(0xFFF4F7F9); // Latar belakang
-const Color plnRed = Color(0xFFD32F2F); // Merah (logout)
-const Color plnGreen = Color(0xFF388E3C); // Hijau (disetujui)
-const Color plnOrange = Color(0xFFF57C00); // Oranye (menunggu)
-// -------------------------------------------------
+// --- (Warna-warna PLN) ---
+const Color plnBlue = Color(0xFF0D47A1);
+const Color plnYellow = Color(0xFFF9A825);
+const Color plnLightGray = Color(0xFFF4F7F9);
+const Color plnRed = Color(0xFFD32F2F);
+const Color plnGreen = Color(0xFF388E3C);
+const Color plnOrange = Color(0xFFF57C00);
+// --------------------------
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +60,6 @@ class MyApp extends StatelessWidget {
           Locale('id', 'ID'),
         ],
 
-        // === TEMA PLN SESUAI SCREENSHOT BARU ===
         theme: ThemeData(
           primaryColor: plnBlue,
           scaffoldBackgroundColor: plnLightGray,
@@ -71,26 +70,23 @@ class MyApp extends StatelessWidget {
             bodyColor: const Color(0xFF333333),
             displayColor: const Color(0xFF333333),
           ),
-
-          // TEMA KARTU (Putih mengambang)
+          
+          // --- PERUBAHAN DI SINI ---
           cardTheme: CardThemeData(
-            elevation: 1, // Bayangan lembut
+            elevation: 1,
             color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            // margin: ... (BARIS INI DIHAPUS)
           ),
+          // --- BATAS PERUBAHAN ---
 
-          // TEMA APPBAR (Biru PLN)
           appBarTheme: const AppBarTheme(
             backgroundColor: plnBlue,
             foregroundColor: Colors.white,
             elevation: 0,
-            // (Judul di screenshot terlihat rata kiri, ini default di Flutter)
           ),
-
-          // TEMA TOMBOL UTAMA (Biru PLN)
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               backgroundColor: plnBlue,
@@ -105,8 +101,6 @@ class MyApp extends StatelessWidget {
               )
             ),
           ),
-
-          // TEMA FORM INPUT (Modern)
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: Colors.white,
@@ -125,11 +119,14 @@ class MyApp extends StatelessWidget {
             prefixIconColor: plnBlue,
             iconColor: plnBlue,
           ),
-          
-          // HAPUS TEMA FAB
-          // floatingActionButtonTheme: ... (Kita hapus ini)
-          
-          // TEMA CHIP (Untuk Status)
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: plnYellow,
+            foregroundColor: plnBlue,
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+          ),
           chipTheme: ChipThemeData(
             labelStyle: const TextStyle(
               color: Colors.white, 
@@ -142,14 +139,13 @@ class MyApp extends StatelessWidget {
             ),
           )
         ),
-        // === AKHIR TEMA ===
-
+        
         home: const LoginScreen(),
         
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
-          '/user_dashboard': (context) => const UserDashboardScreen(),
+          '/user_dashboard': (context) => const UserMainScreen(), 
           '/admin_dashboard': (context) => const AdminDashboardScreen(),
           '/booking_form': (context) => const BookingFormScreen(),
         },

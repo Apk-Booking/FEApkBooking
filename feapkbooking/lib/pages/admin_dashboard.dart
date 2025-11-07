@@ -133,27 +133,25 @@ class AdminDashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 8), 
                     
-                    // --- PERUBAHAN: Tombol Ikon Saja ---
                     ElevatedButton(
                       onPressed: () {
                          Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const BookingFormScreen(existingBooking: null),
+                            // --- PANGGILAN YANG BENAR (TANPA PARAMETER) ---
+                            builder: (context) => const BookingFormScreen(),
                           ),
                         );
                       },
-                      child: const Icon(Icons.add, size: 24), // Hanya ikon
+                      child: const Icon(Icons.add, size: 24),
                       style: ElevatedButton.styleFrom(
-                        // Warna (plnBlue) sudah dari tema
-                        minimumSize: const Size(48, 48), // Ukuran tombol
-                        padding: EdgeInsets.zero, // Padding minimal
+                        minimumSize: const Size(48, 48),
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                    // --- BATAS PERUBAHAN ---
                   ],
                 ),
 
@@ -224,6 +222,7 @@ class AdminDashboardScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
+              // --- PANGGILAN YANG BENAR (DENGAN PARAMETER) ---
               builder: (context) => BookingFormScreen(existingBooking: booking),
             ),
           );
