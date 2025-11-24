@@ -2,7 +2,6 @@
 
 import 'package:feapkbooking/auth/login_screen.dart';
 import 'package:feapkbooking/auth/register_screen.dart';
-import 'package:feapkbooking/pages/admin_dashboard.dart';
 import 'package:feapkbooking/pages/booking_form.dart';
 import 'package:feapkbooking/pages/user_main_screen.dart'; 
 import 'package:feapkbooking/providers/booking_provider.dart';
@@ -71,16 +70,16 @@ class MyApp extends StatelessWidget {
             displayColor: const Color(0xFF333333),
           ),
           
-          // --- PERUBAHAN DI SINI ---
+          // --- PERBAIKAN TEMA KARTU (HAPUS MARGIN) ---
           cardTheme: CardThemeData(
             elevation: 1,
             color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            // margin: ... (BARIS INI DIHAPUS)
+            // margin: ... (HAPUS INI AGAR RESPONSIVE)
           ),
-          // --- BATAS PERUBAHAN ---
+          // --- BATAS PERBAIKAN ---
 
           appBarTheme: const AppBarTheme(
             backgroundColor: plnBlue,
@@ -145,8 +144,8 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
-          '/user_dashboard': (context) => const UserMainScreen(), 
-          '/admin_dashboard': (context) => const AdminDashboardScreen(),
+          '/user_dashboard': (context) => const UserMainScreen(),
+          // '/admin_dashboard': (context) => const AdminDashboardScreen(), // HAPUS INI JUGA
           '/booking_form': (context) => const BookingFormScreen(),
         },
       ),

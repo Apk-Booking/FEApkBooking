@@ -4,12 +4,7 @@ class AuthService {
   // Database dummy, 'static' agar datanya bertahan
   // selama aplikasi berjalan
   static final List<Map<String, String>> _mockDatabase = [
-    {
-      "email": "admin@pln.com",
-      "password": "admin123",
-      "nama": "Admin PLN",
-      "role": "admin"
-    },
+
     {
       "email": "user@pln.com",
       "password": "user123",

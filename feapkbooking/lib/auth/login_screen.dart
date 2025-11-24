@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-
-// Import untuk Splash Screen
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  // Pre-fill untuk tes lebih cepat
+  // Pre-fill untuk tes
   final _emailController = TextEditingController(text: 'user@pln.com');
   final _passwordController = TextEditingController(text: 'user123');
 
@@ -55,11 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (mounted) {
       if (success) {
-        if (authProvider.userRole == UserRole.admin) {
-          Navigator.pushReplacementNamed(context, '/admin_dashboard');
-        } else {
-          Navigator.pushReplacementNamed(context, '/user_dashboard');
-        }
+        // --- PERBAIKAN PENTING DI SINI ---
+        // Karena Admin Dashboard sudah dihapus, 
+        // kita arahkan SEMUA orang ke User Dashboard
+        Navigator.pushReplacementNamed(context, '/user_dashboard');
+        // ---------------------------------
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -74,14 +72,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Background diambil dari main.dart (abu-abu muda)
       body: Center(
         child: Card(
+          // Kartu putih mengambang
           margin: const EdgeInsets.all(24.0),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(32.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // Agar card pas di konten
+              mainAxisSize: MainAxisSize.min, 
               children: [
                 Image.asset(
                   'assets/images/Logo_PLN.png',
@@ -93,13 +93,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF005EA0), // Biru PLN
+                    color: Color(0xFF0D47A1), // Biru PLN
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Sistem Booking Ruang Rapat',
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
                 Form(
@@ -132,9 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _login,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+                          // Style tombol diambil dari main.dart
                           child: _isLoading
                               ? const SizedBox(
                                   height: 20,
@@ -144,22 +144,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                     strokeWidth: 3,
                                   ),
                                 )
-                              : const Text('Login', style: TextStyle(fontSize: 16)),
+                              : const Text('Login'),
                         ),
                       ),
                       const SizedBox(height: 16),
                       
-                      // --- PERBAIKAN: GANTI Row MENJADI Wrap ---
+                      // Gunakan Wrap agar tidak overflow di layar kecil
                       Wrap(
-                        alignment: WrapAlignment.center, // Tetap di tengah
-                        crossAxisAlignment: WrapCrossAlignment.center, // Sejajar
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           const Text('Belum punya akun?'),
                           TextButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/register');
                             },
-                            // Kurangi padding bawaan TextButton agar lebih rapat
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 5),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -168,7 +167,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       )
-                      // --- BATAS PERBAIKAN ---
                     ],
                   ),
                 ),
