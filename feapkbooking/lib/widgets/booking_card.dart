@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
 
-// Definisikan warna di sini
+// Definisi Warna PLN
 const Color plnGreen = Color(0xFF388E3C);
 const Color plnOrange = Color(0xFFF57C00);
 const Color plnRed = Color(0xFFD32F2F);
@@ -17,97 +17,130 @@ class BookingCard extends StatelessWidget {
 
   Color _getStatusColor(BookingStatus status) {
     switch (status) {
-      case BookingStatus.disetujui:
-        return plnGreen;
-      case BookingStatus.ditolak:
-        return plnRed;
-      case BookingStatus.menunggu:
-      default:
-        return plnOrange;
+      case BookingStatus.disetujui: return plnGreen;
+      case BookingStatus.ditolak: return plnRed;
+      default: return plnOrange;
     }
   }
 
   String _getStatusText(BookingStatus status) {
     switch (status) {
-      case BookingStatus.disetujui:
-        return 'Disetujui';
-      case BookingStatus.ditolak:
-        return 'Ditolak';
-      case BookingStatus.menunggu:
-      default:
-        return 'Menunggu';
+      case BookingStatus.disetujui: return 'Disetujui';
+      case BookingStatus.ditolak: return 'Ditolak (Penuh)';
+      default: return 'Menunggu Konfirmasi';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Card ini akan otomatis mengambil tema (putih, rounded) dari main.dart
     return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- HEADER: NAMA RUANGAN & STATUS ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
                     booking.namaRuangan,
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold
                     ),
                   ),
                 ),
-                // Chip ini akan mengambil tema dari main.dart
-                Chip(
-                  label: Text(_getStatusText(booking.status)),
-                  backgroundColor: _getStatusColor(booking.status),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(booking.status),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _getStatusText(booking.status),
+                    style: const TextStyle(
+                      color: Colors.white, 
+                      fontSize: 11, 
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              'ID Booking: ${booking.id}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            const Divider(height: 24),
-            _buildDetailRow(
-                Icons.person_outline, 'Nama Pegawai', booking.namaPegawai),
-            _buildDetailRow(
-                Icons.corporate_fare_outlined, 'Divisi', booking.divisi),
-            _buildDetailRow(
-                Icons.calendar_today_outlined,
-                'Tanggal',
-                DateFormat('EEEE, dd MMMM yyyy').format(booking.tanggal)),
-            _buildDetailRow(Icons.access_time_outlined, 'Waktu',
-                '${booking.waktuMulai} - ${booking.waktuSelesai}'),
+            
+            // --- PESAN ERROR (JIKA DITOLAK) ---
+            if (booking.status == BookingStatus.ditolak) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: plnRed.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: plnRed.withOpacity(0.3)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 18, color: plnRed),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Mohon maaf, slot waktu tersebut sudah penuh. Silakan pilih waktu lain.",
+                        style: TextStyle(color: plnRed, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            const Divider(height: 24, thickness: 1),
+
+            // --- DETAIL INFORMASI ---
+            
+            // 1. TAMPILKAN NAMA PEGAWAI DI SINI
+            _rowInfo(Icons.person, booking.namaPegawai, isBold: true), 
+            
+            const SizedBox(height: 6), // Jarak dikit
+            
+            // 2. TANGGAL
+            _rowInfo(Icons.calendar_today_outlined, DateFormat('dd MMMM yyyy').format(booking.tanggal)),
+            
+            // 3. JAM
+            _rowInfo(Icons.access_time, '${booking.waktuMulai} - ${booking.waktuSelesai} WIB'),
+            
+            // 4. DIVISI
+            _rowInfo(Icons.corporate_fare_outlined, booking.divisi),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String title, String value) {
+  // Helper Widget untuk Baris Detail
+  Widget _rowInfo(IconData icon, String text, {bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: plnBlue, size: 20),
-          const SizedBox(width: 12),
+          Icon(icon, size: 18, color: Colors.grey[600]), // Icon abu-abu
+          const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                Text(value, style: const TextStyle(fontSize: 14)),
-              ],
+            child: Text(
+              text, 
+              style: TextStyle(
+                fontSize: 14, 
+                color: Colors.black87,
+                // Jika nama pegawai (isBold=true), kita tebalkan sedikit
+                fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
