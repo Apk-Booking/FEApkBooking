@@ -28,11 +28,17 @@ class BookingFormScreen extends StatefulWidget {
 class _BookingFormScreenState extends State<BookingFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _namaController = TextEditingController();
-  final _waktuController = TextEditingController();
   
+  // HAPUS: _waktuController tidak dipakai lagi
+  // final _waktuController = TextEditingController(); 
+
   String? _selectedDivisi;
   String? _selectedRuangan;
   DateTime? _selectedDate;
+  
+  // BARU: Variabel untuk menyimpan slot waktu yang dipilih
+  String? _selectedTimeSlot; 
+
   BookingStatus _selectedStatus = BookingStatus.menunggu;
   bool _isLoading = false;
   bool _isInit = true;
@@ -42,9 +48,21 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   final List<String> _listDivisi = [
     'Distribusi', 'Transmisi', 'Pembangkitan', 'Keuangan', 'SDM', 'Hukum', 'IT'
   ];
+
   final List<String> _listRuangan = [
     'Ruang Sriwijaya', 'Ruang Majapahit', 'Ruang Rapat Utama', 
     'Ruang Rapat Lt.2', 'Ruang Rapat Lt.3', 'Ruang Rapat Lt.4'
+  ];
+
+  // BARU: Daftar Slot Waktu (Bisa disesuaikan kebutuhan)
+  final List<String> _timeSlots = [
+    '08:00 - 09:00',
+    '09:00 - 10:00',
+    '10:00 - 11:00',
+    '11:00 - 12:00',
+    '13:00 - 14:00',
+    '14:00 - 15:00',
+    '15:00 - 16:00',
   ];
 
   @override
@@ -56,7 +74,20 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
       _selectedDivisi = booking.divisi;
       _selectedRuangan = booking.namaRuangan;
       _selectedDate = booking.tanggal;
-      _waktuController.text = '${booking.waktuMulai}-${booking.waktuSelesai}';
+      
+      // Menggabungkan waktu lama ke format slot agar tombol terpilih otomatis
+      // Format harus persis sama dengan yang ada di _timeSlots
+      String combinedTime = '${booking.waktuMulai} - ${booking.waktuSelesai}';
+      
+      // Cek apakah waktu booking lama ada di list slot kita
+      if (_timeSlots.contains(combinedTime)) {
+        _selectedTimeSlot = combinedTime;
+      } else {
+        // Jika format lama beda (misal manual), kita biarkan kosong atau isi custom
+        // Di sini kita biarkan null agar user memilih ulang slot yang valid
+        _selectedTimeSlot = null; 
+      }
+      
       _selectedStatus = booking.status;
     } else if (widget.selectedRoomName != null) {
       _selectedRuangan = widget.selectedRoomName;
@@ -82,27 +113,22 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   @override
   void dispose() {
     _namaController.dispose();
-    _waktuController.dispose();
+    // _waktuController.dispose(); // Sudah dihapus
     super.dispose();
   }
 
-  // --- PERBAIKAN LOGIKA TANGGAL ---
   Future<void> _selectDate(BuildContext context) async {
-    // 1. Tentukan "hari ini" (tanpa jam/menit)
     final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    // 2. Tentukan tanggal awal kalender
     DateTime initialToShow = _selectedDate ?? today;
 
-    // 3. JIKA tanggal yang diedit (initialToShow) sudah lewat (sebelum hari ini),
-    //    MAKA paksa kalender terbuka di hari ini.
     if (initialToShow.isBefore(today)) {
       initialToShow = today;
     }
 
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initialToShow, // <-- Gunakan tanggal yang sudah diperbaiki
-      firstDate: today, // <-- Gunakan 'today' sebagai tanggal paling awal
+      initialDate: initialToShow,
+      firstDate: today,
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedDate) {
@@ -111,19 +137,25 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
       });
     }
   }
-  // --- BATAS PERBAIKAN ---
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate() || _selectedDate == null) {
+    // Validasi tambahan untuk TimeSlot
+    if (!_formKey.currentState!.validate() || _selectedDate == null || _selectedTimeSlot == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Harap isi semua field dan tanggal')),
+          const SnackBar(content: Text('Harap isi semua field, tanggal, dan jam')),
         );
       return;
     }
+
     setState(() { _isLoading = true; });
     final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
 
     try {
+      // Pecah string "08:00 - 09:00" menjadi dua bagian
+      final splitTime = _selectedTimeSlot!.split(' - ');
+      final String start = splitTime[0];
+      final String end = splitTime[1];
+
       if (isEditMode) {
         final updatedBooking = Booking(
           id: widget.existingBooking!.id,
@@ -131,8 +163,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           divisi: _selectedDivisi!,
           namaRuangan: _selectedRuangan!,
           tanggal: _selectedDate!,
-          waktuMulai: _waktuController.text.split('-')[0], 
-          waktuSelesai: _waktuController.text.split('-')[1],
+          waktuMulai: start, 
+          waktuSelesai: end,
           status: _selectedStatus,
         );
         await bookingProvider.updateBooking(updatedBooking);
@@ -143,8 +175,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           divisi: _selectedDivisi!,
           namaRuangan: _selectedRuangan!,
           tanggal: _selectedDate!,
-          waktuMulai: _waktuController.text.split('-')[0],
-          waktuSelesai: _waktuController.text.split('-')[1],
+          waktuMulai: start,
+          waktuSelesai: end,
           status: _selectedStatus,
         );
         await bookingProvider.createBooking(newBooking);
@@ -201,6 +233,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                     value == null || value.isEmpty ? 'Nama tidak boleh kosong' : null,
               ),
               const SizedBox(height: 20),
+              
               DropdownButtonFormField<String>(
                 value: _selectedDivisi,
                 decoration: const InputDecoration(
@@ -237,6 +270,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
               ),
               
               const SizedBox(height: 20),
+              
               InkWell(
                 onTap: () => _selectDate(context),
                 child: Container(
@@ -244,6 +278,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade400, width: 0.5), // Tambahan border agar terlihat seperti input
                   ),
                   child: Row(
                     children: [
@@ -262,20 +297,66 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _waktuController,
-                decoration: const InputDecoration(
-                  labelText: 'Jam Penggunaan',
-                  hintText: 'Contoh: 09:00-11:00',
-                  prefixIcon: Icon(Icons.access_time_outlined),
-                ),
-                validator: (value) {
-                    if (value == null || value.isEmpty) return 'Jam tidak boleh kosong';
-                    if (!value.contains('-')) return 'Format salah (Contoh: 09:00-11:00)';
-                    return null;
-                },
+
+              const SizedBox(height: 24),
+              
+              // --- BAGIAN PILIH JAM (CHIPS) ---
+              const Text(
+                'Pilih Jam Penggunaan',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: plnBlue),
               ),
+              const SizedBox(height: 12),
+              
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Wrap(
+                  spacing: 10.0,
+                  runSpacing: 10.0,
+                  alignment: WrapAlignment.center, // Tengah
+                  children: _timeSlots.map((timeSlot) {
+                    final bool isSelected = _selectedTimeSlot == timeSlot;
+                    return ChoiceChip(
+                      label: Text(timeSlot),
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      selected: isSelected,
+                      selectedColor: plnBlue, // Warna saat dipilih
+                      backgroundColor: Colors.grey[200], // Warna saat tidak dipilih (mirip screenshot)
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: isSelected ? plnBlue : Colors.transparent,
+                        )
+                      ),
+                      onSelected: (bool selected) {
+                        setState(() {
+                          // Jika diklik lagi, bisa di-unselect atau tetap (pilih salah satu)
+                          // Di sini saya buat wajib pilih salah satu, jadi kalau sudah selected tidak bisa null
+                          _selectedTimeSlot = selected ? timeSlot : null;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              // Validasi visual kecil jika user lupa pilih jam
+              if (_selectedTimeSlot == null)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0, left: 12),
+                  child: Text(
+                    'Mohon pilih salah satu slot waktu',
+                    style: TextStyle(color: Color(0xFFD32F2F), fontSize: 12),
+                  ),
+                ),
+              // ---------------------------------
               
               if (isAdmin && isEditMode) ...[
                 const SizedBox(height: 20),
