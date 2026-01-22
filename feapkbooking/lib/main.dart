@@ -3,7 +3,7 @@
 import 'package:feapkbooking/auth/login_screen.dart';
 import 'package:feapkbooking/auth/register_screen.dart';
 import 'package:feapkbooking/pages/booking_form.dart';
-import 'package:feapkbooking/pages/user_main_screen.dart'; 
+import 'package:feapkbooking/pages/user_main_screen.dart';
 import 'package:feapkbooking/providers/booking_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -32,7 +32,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  
   const MyApp({Key? key}) : super(key: key);
+  
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +51,6 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'PLN Booking App',
         debugShowCheckedModeBanner: false,
-
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
@@ -58,95 +59,98 @@ class MyApp extends StatelessWidget {
         supportedLocales: const [
           Locale('id', 'ID'),
         ],
-
         theme: ThemeData(
-          primaryColor: plnBlue,
-          scaffoldBackgroundColor: plnLightGray,
-          fontFamily: GoogleFonts.poppins().fontFamily,
-          textTheme: GoogleFonts.poppinsTextTheme(
-            Theme.of(context).textTheme,
-          ).apply(
-            bodyColor: const Color(0xFF333333),
-            displayColor: const Color(0xFF333333),
-          ),
-          
-          // --- PERBAIKAN TEMA KARTU (HAPUS MARGIN) ---
-          cardTheme: CardThemeData(
-            elevation: 1,
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            primaryColor: plnBlue,
+            scaffoldBackgroundColor: plnLightGray,
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            textTheme: GoogleFonts.poppinsTextTheme(
+              Theme.of(context).textTheme,
+            ).apply(
+              bodyColor: const Color(0xFF333333),
+              displayColor: const Color(0xFF333333),
             ),
-            // margin: ... (HAPUS INI AGAR RESPONSIVE)
-          ),
-          // --- BATAS PERBAIKAN ---
 
-          appBarTheme: const AppBarTheme(
-            backgroundColor: plnBlue,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
+            // --- PERBAIKAN TEMA KARTU (HAPUS MARGIN) ---
+            cardTheme: CardThemeData(
+              elevation: 1,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              // margin: ... (HAPUS INI AGAR RESPONSIVE)
+            ),
+            // --- BATAS PERBAIKAN ---
+
+            appBarTheme: const AppBarTheme(
               backgroundColor: plnBlue,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              elevation: 0,
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: plnBlue,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  )),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
               ),
-              textStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              )
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: plnBlue, width: 2),
+              ),
+              prefixIconColor: plnBlue,
+              iconColor: plnBlue,
             ),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+            floatingActionButtonTheme: const FloatingActionButtonThemeData(
+              backgroundColor: plnYellow,
+              foregroundColor: plnBlue,
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: plnBlue, width: 2),
-            ),
-            prefixIconColor: plnBlue,
-            iconColor: plnBlue,
-          ),
-          floatingActionButtonTheme: const FloatingActionButtonThemeData(
-            backgroundColor: plnYellow,
-            foregroundColor: plnBlue,
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-          ),
-          chipTheme: ChipThemeData(
-            labelStyle: const TextStyle(
-              color: Colors.white, 
-              fontWeight: FontWeight.bold,
-              fontSize: 12
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          )
-        ),
-        
+            chipTheme: ChipThemeData(
+              labelStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            )),
         home: const LoginScreen(),
-        
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/user_dashboard': (context) => const UserMainScreen(),
           // '/admin_dashboard': (context) => const AdminDashboardScreen(), // HAPUS INI JUGA
-          '/booking_form': (context) => const BookingFormScreen(),
+          '/booking_form': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>;
+
+            return BookingFormScreen(
+              roomId: args['_id'], // 🔥 ambil ID
+              selectedRoomName: args['namaruangan'],
+            );
+          },
         },
       ),
     );

@@ -44,13 +44,12 @@ class RoomCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-
-                _buildInfoRow(Icons.people_outline, 'Kapasitas: ${room.kapasitas} orang'),
+                _buildInfoRow(
+                    Icons.people_outline, 'Kapasitas: ${room.kapasitas} orang'),
                 const SizedBox(height: 4),
-                _buildInfoRow(Icons.location_on_outlined, 'Lantai: ${room.lantai}'),
-                
+                _buildInfoRow(
+                    Icons.location_on_outlined, 'Lantai: ${room.lantai}'),
                 const SizedBox(height: 12),
-
                 Wrap(
                   spacing: 6.0,
                   runSpacing: 6.0,
@@ -58,7 +57,8 @@ class RoomCard extends StatelessWidget {
                     return Chip(
                       label: Text(fasilitas),
                       backgroundColor: Colors.grey[200],
-                      labelStyle: const TextStyle(fontSize: 10, color: Colors.black54),
+                      labelStyle:
+                          const TextStyle(fontSize: 10, color: Colors.black54),
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     );
@@ -67,7 +67,6 @@ class RoomCard extends StatelessWidget {
               ],
             ),
           ),
-          
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -77,7 +76,7 @@ class RoomCard extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => BookingFormScreen(
-                      selectedRoomName: room.nama, 
+                      selectedRoomName: room.nama,
                     ),
                   ),
                 );

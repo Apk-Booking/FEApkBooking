@@ -1,59 +1,75 @@
-// lib/auth/auth_service.dart
+// lib/auth/auth_services.dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class AuthService {
-  // Database dummy, 'static' agar datanya bertahan
-  // selama aplikasi berjalan
-  static final List<Map<String, String>> _mockDatabase = [
+  static const String baseUrl = 'meetyuk-d4d37074a638.herokuapp.com/api/user';
 
-    {
-      "email": "user@pln.com",
-      "password": "user123",
-      "nama": "Budi Santoso", // Kita pakai Budi sebagai user default
-      "role": "user"
-    }
-  ];
+  // ================= LOGIN =================
+  Future<Map<String, dynamic>?> login(String email, String password) async {
+    final url = Uri.parse('$baseUrl/login');
 
-  // Method login diubah untuk mengembalikan Map (info user)
-  Future<Map<String, String>?> login(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulasi API call
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email,
+          "password": password,
+        }),
+      );
 
-    final user = _mockDatabase.firstWhere(
-      (user) => user['email'] == email && user['password'] == password,
-      orElse: () => {}, // Return map kosong jika tidak ketemu
-    );
-
-    if (user.isNotEmpty) {
-      return user; // Kembalikan semua info user
-    } else {
-      return null; // Gagal login
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['status'] == 'success') {
+          return json['data']; // token + user
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Login error: $e');
+      return null;
     }
   }
 
-  // Method register diubah untuk menyimpan ke database
-  Future<bool> register(String name, String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulasi API call
+  // ================= REGISTER =================
+  Future<bool> register({
+    required String nama,
+    required String idPegawai,
+    required String unit,
+    required String email,
+    required String password,
+    required String noTelephone,
+    required String role,
+  }) async {
+    final url = Uri.parse('$baseUrl/create');
 
-    // Cek apakah email sudah ada
-    final emailExists = _mockDatabase.any((user) => user['email'] == email);
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "nama": nama,
+          "idpegawai": idPegawai,
+          "unit": unit,
+          "email": email,
+          "password": password,
+          "notelphone": noTelephone,
+          "role": role,
+        }),
+      );
 
-    if (emailExists) {
-      print('Registrasi Gagal: Email $email sudah terdaftar.');
-      return false; // Gagal, email sudah ada
-    } else {
-      // Tambahkan user baru
-      _mockDatabase.add({
-        "email": email,
-        "password": password,
-        "nama": name,
-        "role": "user" // User baru selalu 'user'
-      });
-      print('User baru terdaftar: $name ($email)');
-      return true; // Sukses
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Register error: $e');
+      return false;
     }
   }
 
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    print('User logged out');
+    await Future.delayed(const Duration(milliseconds: 300));
   }
 }
